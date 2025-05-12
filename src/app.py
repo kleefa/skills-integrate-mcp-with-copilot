@@ -7,7 +7,7 @@ for extracurricular activities at Mergington High School.
 
 from fastapi import FastAPI, HTTPException
 from fastapi.staticfiles import StaticFiles
-from fastapi.responses import RedirectResponse
+from fastapi.responses import RedirectResponse, JSONResponse
 import os
 from pathlib import Path
 
@@ -130,3 +130,18 @@ def unregister_from_activity(activity_name: str, email: str):
     # Remove student
     activity["participants"].remove(email)
     return {"message": f"Unregistered {email} from {activity_name}"}
+
+
+@app.get("/analytics", response_class=JSONResponse)
+def get_participation_analytics():
+    total_activities = len(activities)
+    total_participants = sum(len(activity["participants"]) for activity in activities.values())
+    average_participants = total_participants / total_activities if total_activities > 0 else 0
+
+    analytics = {
+        "total_activities": total_activities,
+        "total_participants": total_participants,
+        "average_participants": average_participants
+    }
+
+    return analytics
